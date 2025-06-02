@@ -4,7 +4,7 @@ This is an implementation of an **Apperception Engine** written *de novo* in Pro
 
 An Apperception Engine is a system that analyzes sequences of observations and infers causal theories that explain them. The engine operates by iteratively searching through a space of possible theories (doing unsupervised logic program induction), evaluating their adequacy and conciseness, and retaining the best ones based on the search criteria.
 
-The aim is to efficiently generate "good enough" causal theories in order to support cognitive processes. 
+The aim is to generate "good enough" causal theories "quickly enough" to support cognitive processes.
 
 ## Core Functionality
 
