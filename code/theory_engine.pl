@@ -24,10 +24,10 @@ theory_engine:theory(Template, SequenceAsTrace, 0, Theory, Trace).
 
 :- use_module(library(lists)).
 :- use_module(library(aggregate)).
-:- use_module(code(type_signature)).
+:- use_module(apperception(type_signature)).
 :- use_module(utils(logger)).
-:- use_module(code(domains)).
-:- use_module(code(initial_conditions_primer)).
+:- use_module(apperception(domains)).
+:- use_module(apperception(initial_conditions_primer)).
 :- use_module(utils(global)).
 :- use_module(library(chr)).
 

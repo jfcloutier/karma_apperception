@@ -28,8 +28,8 @@ engine_destroy(TheoryTemplateEngine).
 :- module(template_engine, [create_theory_template_engine/4]).
 
 :- use_module(utils(logger)).
-:- use_module(code(type_signature)).
-:- use_module(code(domains)).
+:- use_module(apperception(type_signature)).
+:- use_module(apperception(domains)).
 :- use_module(library(uuid)).
 
 %% Create an engine that produces theory templates on request

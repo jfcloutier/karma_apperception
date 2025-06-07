@@ -7,8 +7,8 @@ run_tests(apperceive).
 :- begin_tests(apperceive).
 
 :- use_module(utils(logger)).
-:- use_module(code(sequence)).
-:- use_module(code(apperception_engine)).
+:- use_module(apperception(sequence)).
+:- use_module(apperception(apperception_engine)).
 :- use_module(tests(leds_observations)).
 :- use_module(tests(eca_observations)).
 

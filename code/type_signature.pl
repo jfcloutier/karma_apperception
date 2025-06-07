@@ -14,7 +14,7 @@ sequence(eca_observations, Sequence), min_type_signature(Sequence, MinTypeSignat
 */
 
 :- use_module(utils(logger)).
-:- use_module(code(domains)).
+:- use_module(apperception(domains)).
 
 % The minimum type signature manifested by a sequence of obaservations.
 min_type_signature(Sequence, TypeSignature) :-

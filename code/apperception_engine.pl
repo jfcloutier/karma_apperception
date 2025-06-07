@@ -50,10 +50,10 @@ apperceive(Sequence, ApperceptionLimits, Theories).
 */
 
 :- use_module(utils(logger)).
-:- use_module(code(template_engine)).
-:- use_module(code(theory_engine)).
-:- use_module(code(type_signature)).
-:- use_module(code(rating)).
+:- use_module(apperception(template_engine)).
+:- use_module(apperception(theory_engine)).
+:- use_module(apperception(type_signature)).
+:- use_module(apperception(rating)).
 :- use_module(library(chr)).
 
 
