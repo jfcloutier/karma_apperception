@@ -10,7 +10,7 @@ facts_from_observations(SequenceAsTrace, Facts) :-
     member(State, RandSequenceAsTrace),
     % [State | _] = SequenceAsTrace, % REMOVE THIS
     sort(0, @<, State, OrderedState),
-    log(info, theory_engine, 'Priming initial conditions with observed ~p', [OrderedState]),
+    log(info, theory_engine, "Priming initial conditions with observed ~p", [OrderedState]),
     observations(OrderedState, [], Facts).
 
 observations([], Acc, Acc).
@@ -57,7 +57,7 @@ latent_related_objects(TypeSignature, PredicateName, Facts) :-
     last(ChainObjects, Last),
     chained_related_pairs(ChainObjects, [Last-First], ObjectPairs),
     relations_to_facts(PredicateName, ObjectPairs, [], Facts),
-    log(info, theory_engine, 'Priming initial conditions with unobserved relations ~p', [Facts]).
+    log(info, theory_engine, "Priming initial conditions with unobserved relations ~p", [Facts]).
 
 chained_related_pairs([],ObjectPairs, ObjectPairs).
 chained_related_pairs([_],ObjectPairs, ObjectPairs).

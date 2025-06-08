@@ -230,11 +230,11 @@ max_template_count_reached(Reached) :-
         (
             engine_fetch(max_region_templates_reached(Reached)), 
             Reached == true ->
-                log(warn, template_engine, 'FETCHED max_region_templates_reached(~p)', [Reached])
+                log(warn, template_engine, "FETCHED max_region_templates_reached(~p)", [Reached])
         ),
         _,
         (
-            log(debug, template_engine, 'FAILED TO FETCH max_region_templates_reached/1'),
+            log(debug, template_engine, "FAILED TO FETCH max_region_templates_reached/1"),
             Reached = false
         )
         ).

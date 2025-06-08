@@ -321,7 +321,7 @@ theory(Template, SequenceAsTrace, Iteration, Theory, Trace) :-
 % throw an error to indicate an incomplete search, so that the search within the template is not considered exhausted.
 theory(Template, _, _, _, _) :-
     is_search_truncated,
-    log(note, theory_engine, 'Search of template ~p was truncated', [Template.id]),
+    log(note, theory_engine, "Search of template ~p was truncated", [Template.id]),
     throw(error(template_search_truncated, context(theory_engine, 'search terminated but was truncated'))).
 
 % Set a non-backtrackable global for the thread that a theory was found.
@@ -334,7 +334,7 @@ theory_found :-
 
 % Persist in the thread that the search was truncated somewhere
 search_truncated(Template) :-
-    log(note, theory_engine, 'Search truncated for template ~p!', [Template.id]),
+    log(note, theory_engine, "Search truncated for template ~p!", [Template.id]),
     set_global(theory_engine, search_truncated, true).
 
 is_search_truncated :-
@@ -350,7 +350,7 @@ theory_limits(Template, Iteration) :-
 iteration_template_deadline(Template, Iteration, Deadline) :-
     MaxTime = Template.limits.max_search_time,
     Deadline is round(MaxTime +(MaxTime * Iteration / 2)),
-    log(note, apperception_engine, 'Max time for template ~p is ~p', [Template.id, Deadline]).
+    log(note, apperception_engine, "Max time for template ~p is ~p", [Template.id, Deadline]).
 
 % Maximum time allocated to search the template for theories
 template_deadline(MaxTime) :-
@@ -365,14 +365,14 @@ after_deadline(Deadline, MaxTime) :-
     TimeLeft is Deadline - Now,
     TimeLeft < MaxTime * 0.9,
     TimeSpent is round(MaxTime - TimeLeft),
-    log(note, theory_engine, 'Too much time spent without finding a theory in this template: ~p out of ~p secs', [TimeSpent, MaxTime]),
+    log(note, theory_engine, "Too much time spent without finding a theory in this template: ~p out of ~p secs", [TimeSpent, MaxTime]),
     throw(error(template_search_time_expired, context(theory_engine, 'too long without finding any theory'))).
 
 % Throw error when template deadline is exceeded - stop searcing for theories in the template
 after_deadline(Deadline, _) :-
     get_time(Now),
     Now > Deadline,
-    log(note, theory_engine, 'Time expired searching for theories in this template'),
+    log(note, theory_engine, "Time expired searching for theories in this template"),
     throw(error(template_search_time_expired, context(theory_engine, 'template deadline reached'))).
 
 %%% STATIC CONSTRAINTS
@@ -383,12 +383,12 @@ after_deadline(Deadline, _) :-
 % A uniqueness constraint states that for an object X, there is exactly one object Y such that r(X, Y).
 %   one_related(pred1). 
 static_constraints(TypeSignature) :-
-    log(info, theory_engine, 'Making static constraints'),
+    log(info, theory_engine, "Making static constraints"),
     all_binary_predicate_names(TypeSignature, AllBinaryPredicateNames),
     maybe_posit_static_constraint(one_related, AllBinaryPredicateNames),
     maybe_posit_static_constraint(one_relation, AllBinaryPredicateNames),
     static_constraints_conceptually_unified(AllBinaryPredicateNames),
-    log(info, theory_engine, 'Done making static constraints').
+    log(info, theory_engine, "Done making static constraints").
 
 maybe_posit_static_constraint(_, _).
 
@@ -427,9 +427,9 @@ static_constraint_about(one_relation(PredicateNames), PredicateName) :-
 
 rules(Kind, Template) :-
     max_body_size(Kind, Template, MaxBodySize),
-    log(info, theory_engine, 'Making ~p rules with max body size ~p', [Kind, MaxBodySize]),    
+    log(info, theory_engine, "Making ~p rules with max body size ~p", [Kind, MaxBodySize]),    
     posit_rules(Kind, Template, MaxBodySize, 0),
-    log(info, theory_engine, 'Done making ~p rules', [Kind]).
+    log(info, theory_engine, "Done making ~p rules", [Kind]).
 
 max_body_size(static, Template, Size) :-
     Size = Template.limits.max_static_rule_body_size.
@@ -455,9 +455,9 @@ posit_rules(Kind, Template, MaxBodySize, RuleCount) :-
             max_body_predicates(BodySize),
             distinct_typed_variables(Template.type_signature.typed_variables, BodySize, [], DistinctVars),
             rule_from_template(Kind, Template, DistinctVars, Head-BodyPredicates),
-            log(debug, theory_engine, 'Rule ~p from template is ~p', [RuleCount, Head-BodyPredicates]),
+            log(debug, theory_engine, "Rule ~p from template is ~p", [RuleCount, Head-BodyPredicates]),
             posited_rule(Kind, Head, BodyPredicates),
-            log(debug, theory_engine, 'Posited rule ~p ~p', [RuleCount, Head-BodyPredicates]),
+            log(debug, theory_engine, "Posited rule ~p ~p", [RuleCount, Head-BodyPredicates]),
             % Check if too many alternate Nth rule have been tried. If so, throw an error.
             count_down_rule_breadth(RuleCount),
             RuleCount1 is RuleCount + 1,
@@ -465,7 +465,7 @@ posit_rules(Kind, Template, MaxBodySize, RuleCount) :-
         ),
         error(rule_breadth_exceeded, _),
         (
-            log(note, theory_engine, 'Max rule breadth at ~p exceeded', [RuleCount]),
+            log(note, theory_engine, "Max rule breadth at ~p exceeded", [RuleCount]),
             search_truncated(Template),
             fail
         )
@@ -535,7 +535,7 @@ unused_predicate_type(Kind, Template) :-
     all_predicate_names(Template.type_signature, PredicateNames),
     member(PredicateName, PredicateNames),
     \+ predicate_type_used_in_rule(Kind, PredicateName),
-    log(info, theory_engine, 'No predicate ~p is being used in ~p rules', [PredicateName, Kind]).
+    log(info, theory_engine, "No predicate ~p is being used in ~p rules", [PredicateName, Kind]).
 
 % The set of variables in predicates
 all_vars([], AllVars, AllVars).
@@ -597,7 +597,7 @@ vars_indirectly_connected(Var1, Var2, Pairs) :-
 
 contradicting_static_rules(Head-Body, OtherHead-OtherBody) :-
     (contradicting_heads(Head-Body, OtherHead-OtherBody) -> 
-        log(debug, theory_engine, 'Contradicting rules!'),
+        log(debug, theory_engine, "Contradicting rules!"),
         true; 
         contradicting_bodies(Head-Body, OtherHead-OtherBody)
     ).
@@ -623,7 +623,7 @@ static_rule_contradicts_constraint(Head-BodyPredicates, one_relation(PredicateNa
     member(Pred2, OtherBodyPredicates),
     Pred2 =.. [PredName2, Var1, Var2],
     subset([PredName1, PredName2], PredicateNames),
-    log(debug, theory_engine, 'Static rule ~p contradicts static constraint ~p', [Head-BodyPredicates, one_relation(PredicateNames)]).
+    log(debug, theory_engine, "Static rule ~p contradicts static constraint ~p", [Head-BodyPredicates, one_relation(PredicateNames)]).
 
 recursive_static_rule(Head-BodyPredicates) :-
     member(BodyPredicate, BodyPredicates),
@@ -635,7 +635,7 @@ recursion_in_static_rules(RulePairs) :-
     member(_-OtherBody, OtherRulePairs),
     member(OtherBodyPredicate, OtherBody),
     Head =@= OtherBodyPredicate,
-    log(debug, theory_engine, 'Recursion on ~p in static rules ~p', [Head, RulePairs]).
+    log(debug, theory_engine, "Recursion on ~p in static rules ~p", [Head, RulePairs]).
 
 % One of the body predicates contradicts the head predicate
 contradicted_head(HeadPredicate, BodyPredicates) :-
@@ -668,12 +668,12 @@ valid_rule_set(causal, Template) :-
 uncaused_varying_predicate(Template) :-
     member(PredicateName, Template.varying_predicate_names),
     \+ predicate_caused(PredicateName),
-    log(debug, theory_engine, 'Uncaused predicate "~p" in rules', [PredicateName]).
+    log(debug, theory_engine, "Uncaused predicate ~p in rules", [PredicateName]).
 
 uncausing_varying_predicate(Template) :-
     member(PredicateName, Template.varying_predicate_names),
     \+ predicate_causing(PredicateName),
-    log(debug, theory_engine, 'Uncausing predicate "~p" in rules', [PredicateName]).
+    log(debug, theory_engine, "Uncausing predicate ~p in rules", [PredicateName]).
 
 %%% MAKING RULES
 
@@ -815,14 +815,14 @@ breaks_static_constraint(one_related(Name), fact(Name, [A1, A2]), fact(Name, [A3
 %%% INITIAL CONDITIONS
 
 initial_conditions(Template, SequenceAsTrace) :-
-    log(info, theory_engine, 'Making initial conditions'),
+    log(info, theory_engine, "Making initial conditions"),
     round(1),
      % Prime the intial conditions (apply heuristics to accelerate the search for unified conditions)
     posit_from_observations(SequenceAsTrace),
     posit_from_unobserved(Template.type_signature, SequenceAsTrace),
     % Complete the initial conditions so that they are unified
     posit_other_initial_conditions(Template),
-    log(info, theory_engine, 'Done making initial conditions').
+    log(info, theory_engine, "Done making initial conditions").
 
 posit_from_observations(SequenceAsTrace) :-
     facts_from_observations(SequenceAsTrace, Facts),
@@ -837,7 +837,7 @@ posit_facts([]).
 posit_facts([Fact | Others]) :-
     primed_fact(Fact),
     !,
-    log(debug, theory_engine, 'Posited observed fact ~p', [Fact]),
+    log(debug, theory_engine, "Posited observed fact ~p", [Fact]),
     posit_facts(Others).
 
 % Get posited constraints
@@ -856,7 +856,7 @@ read_constraints(Constraints, Constraints).
 
 posit_other_initial_conditions(Template) :-
     facts_unified(Template.type_signature, Template.limits.max_static_rules), !,
-    log(info, theory_engine, 'Initial conditions are unified').
+    log(info, theory_engine, "Initial conditions are unified").
 
 posit_other_initial_conditions(Template) :-
     posit_fact(Template),
@@ -867,7 +867,7 @@ posit_fact(Template) :-
    ground_args(ArgTypes, Template.type_signature.objects, Args),
    Fact = fact(PredicateName, Args),
    posited_fact(Fact),
-   log(debug, theory_engine, 'Posited ~p', [Fact]).
+   log(debug, theory_engine, "Posited ~p", [Fact]).
 
 facts_out_of_order(Fact, OtherFact) :-
     (is_primed(Fact) ; is_primed(OtherFact)),
@@ -924,14 +924,14 @@ apply_rules(Kind) :-
 unrepresented_object(Objects) :-
     member(object(_, ObjectName), Objects),
     \+ object_in_a_fact(ObjectName),
-    log(debug, theory_engine, 'Unrepresented object ~p in facts', [ObjectName]).
+    log(debug, theory_engine, "Unrepresented object ~p in facts", [ObjectName]).
 
 % A predicate applicable to an object is not applied to it
 underdescribed_object(TypeSignature) :-
     member(object(ObjectType, ObjectName), TypeSignature.objects),
     applicable_predicate_name(TypeSignature, ObjectType, PredicateName),
     \+ predicate_applied(PredicateName, ObjectName),
-    log(debug, theory_engine, 'Under-described object ~p in facts', [ObjectName]).
+    log(debug, theory_engine, "Under-described object ~p in facts", [ObjectName]).
 
 % There are unrelated objects in the current round
 unrelated_objects(TypeSignature) :-
@@ -942,7 +942,7 @@ unrelated_objects(TypeSignature) :-
         delete(Remaining1, ObjectName2, Remaining2),
         objects_transitively_related(ObjectName1, ObjectName2, Remaining2)
     ),
-    log(debug, unity, 'Unrelated objects ~p and ~p in facts!', [ObjectName1, ObjectName2]).
+    log(debug, unity, "Unrelated objects ~p and ~p in facts!", [ObjectName1, ObjectName2]).
 
 objects_transitively_related(ObjectName1, ObjectName2, _) :-
     objects_directly_related(ObjectName1, ObjectName2), !.
@@ -957,7 +957,7 @@ objects_transitively_related(SourceObjectName, TargetObjectName, ObjectNames) :-
     delete(Remaining1, ObjectName2, Remaining2),
     objects_transitively_related(ObjectName1, ObjectName2, Remaining2),
     !,
-    log(info, theory_engine, 'objects_tranisitively_related(~p, ~p)', [SourceObjectName, TargetObjectName]).
+    log(info, theory_engine, "objects_tranisitively_related(~p, ~p)", [SourceObjectName, TargetObjectName]).
 
 objects_directly_related(ObjectName, ObjectName) :- !.
 
@@ -992,13 +992,13 @@ unsupported_body_predicate(Body) :-
 % It fails if the trace has only one round (the initial conditions).
 
 trace(Trace, SequenceLength) :-
-   log(info, theory_engine, 'Making trace no longer than ~p', [SequenceLength]),
+   log(info, theory_engine, "Making trace no longer than ~p", [SequenceLength]),
     % Grow a trace until it repeats
     grow_trace(SequenceLength),
     % Fail if making a trace did not produce rounds beyond initial conditions
     many_rounds, !,
     extract_trace(Trace),
-    log(info, theory_engine, 'Made trace ~p', [Trace]).
+    log(info, theory_engine, "Made trace ~p", [Trace]).
 
 grow_trace(SequenceLength) :-
      make_next_round,
@@ -1021,7 +1021,7 @@ make_next_round :-
     apply_rules(causal),
     % Move to the next round
     bump_round(PreviousRound),
-    log(info, theory_engine, 'Made round ~p', [PreviousRound]),
+    log(info, theory_engine, "Made round ~p", [PreviousRound]),
     % carry over composable facts that can not be inferred via static rules
     % so that static rules have all the facts they need to infer facts in the new round
     carry_over_unclosable_from(PreviousRound),
@@ -1154,7 +1154,7 @@ contradicting_args([_ | Rest1], [_ | Rest2]) :-
 rule_repeats(Head-BodyPredicates, OtherHead-OtherBodyPredicates) :-
     equivalent_predicates(Head, OtherHead),
     equivalent_bodies(BodyPredicates, OtherBodyPredicates),
-    log(debug, theory_engine, 'Repeated rule ~p', [Head-BodyPredicates]).
+    log(debug, theory_engine, "Repeated rule ~p", [Head-BodyPredicates]).
 
 equivalent_bodies(BodyPredicates, OtherBodyPredicates) :-
     subsumed_conjunctions(BodyPredicates, OtherBodyPredicates) -> true ; subsumed_conjunctions(OtherBodyPredicates, BodyPredicates).
@@ -1247,10 +1247,10 @@ timer_started(Timer, Duration) :-
     get_time(T),
     Deadline is T + (Duration / 1000),
     end_time(Timer, Deadline),
-     log(debug, theory_engine, 'Started timer ~p for ~p', [Timer, Duration]).
+     log(debug, theory_engine, "Started timer ~p for ~p", [Timer, Duration]).
 
 % Succeeds if the timer is done
 times_up(Timer) :- 
     get_time(T),
     time_ended(Timer, T, true),
-    log(debug, theory_engine, 'Times up for ~p', [Timer]).
+    log(debug, theory_engine, "Times up for ~p", [Timer]).

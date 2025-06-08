@@ -34,7 +34,7 @@ engine_destroy(TheoryTemplateEngine).
 
 %% Create an engine that produces theory templates on request
 create_theory_template_engine(MinTypeSignature, VaryingPredicateNames, MaxSignatureExtension, TheoryTemplateEngine) :-
-    log(info, template_engine, 'Creating template engine'),
+    log(info, template_engine, "Creating template engine"),
     engine_create(Template, theory_template(MinTypeSignature, VaryingPredicateNames, MaxSignatureExtension, Template), TheoryTemplateEngine).
 
 %% For testing LEDS
@@ -70,9 +70,9 @@ theory_template(MinTypeSignature, VaryingPredicateNames, MaxSignatureExtension, 
     extended_type_signature(ScrambledMinTypeSignature, SignatureExtensionRegion, ExtendedTypeSignature),
     % implied
     theory_complexity_bounds(ExtendedTypeSignature, TheoryLimits),
-    log(info, template_engine, 'Template created with extension ~p and type signature ~p', [SignatureExtensionRegion, ExtendedTypeSignature]),
+    log(info, template_engine, "Template created with extension ~p and type signature ~p", [SignatureExtensionRegion, ExtendedTypeSignature]),
     uuid(Id),
-    log(note, template_engine, 'Template ~p has ~p', [Id, TheoryLimits]),
+    log(note, template_engine, "Template ~p has ~p", [Id, TheoryLimits]),
     Template = template{id:Id, type_signature:ExtendedTypeSignature, min_type_signature:MinTypeSignature, varying_predicate_names:VaryingPredicateNames,
                         limits:TheoryLimits, region:SignatureExtensionRegion, max_region_templates: Max}.
 
@@ -85,7 +85,7 @@ allow_max_templates(MinTypeSignature, Region, Max) :-
     ObjectsCount is MinObjects + NumObjects,
     PredicatesCount is MinPredicates + NumPredicateTypes,
     Max is ObjectTypesCount * ObjectsCount * PredicatesCount,
-    log(warn, template_engine, 'Max ~p templates allowed for region ~p', [Max, Region]).
+    log(warn, template_engine, "Max ~p templates allowed for region ~p", [Max, Region]).
 
 scramble_signature(TypeSignature, ScrambledTypeSignature) :-
     random_permutation(TypeSignature.object_types, ScrambledObjectTypes),
@@ -100,7 +100,7 @@ signature_extension_region(MaxSignatureExtension, Region) :-
     !,
     member(indexed_region(_, NumObjectTypes, NumObjects, NumPredicateTypes), Regions),
     Region = region(NumObjectTypes, NumObjects, NumPredicateTypes),
-    log(info, template_engine, '****REGION ~p', [Region]).
+    log(info, template_engine, "****REGION ~p", [Region]).
 
 rated_region(max_extension{max_object_types:MaxObjectTypes, max_objects:MaxObjects, max_predicate_types:MaxPredicateTypes}, IndexedRegion) :-
     between(0, MaxObjectTypes, NumObjectTypes),
@@ -142,7 +142,7 @@ theory_complexity_bounds(TypeSignature, Limits) :-
 max_rule_body_sizes(TypeSignature, MaxElements, MaxStaticBodySize, MaxCausalBodySize) :-
     length(TypeSignature.predicate_types, LowerLimit),
     choose_pair_in_range(LowerLimit, MaxElements, MaxStaticBodySize-MaxCausalBodySize),
-    log(note, theory_engine, 'Max static body size = ~p, max causal body size = ~p from ~p', [MaxStaticBodySize, MaxCausalBodySize, LowerLimit-MaxElements]).
+    log(note, theory_engine, "Max static body size = ~p, max causal body size = ~p from ~p", [MaxStaticBodySize, MaxCausalBodySize, LowerLimit-MaxElements]).
 
  % First choose pairs with lowest sum (favor simplicity)
 choose_pair_in_range(Low, High, E1-E2) :-
