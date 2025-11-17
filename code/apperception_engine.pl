@@ -2,32 +2,32 @@
 
 /* 
    A re-implementation of the Apperception Engine described in "Making sense of sensory input" by Richard Evans, Jose Hernandez-Orallo, Johannes Welbl, Pushmeet Kohli, Marek Sergot (https://arxiv.org/abs/1910.02227)
-   Our implementation is optimized to find good enough causal theories quickly enough to satisfy the needs of Cognition Actors forming a Society of Mind.
+   My implementation is optimized to find good enough causal theories quickly enough to satisfy the needs of Cognition Actors forming a Society of Mind.
 
-   How an apperception engine works:
+   How an Apperception Engine (AE) works:
   
-        Given a sequence of observations, it searches for causal theories (tiny logic programs) best explaining the sequence.
+        Given a sequence of observations, the AE searches for causal theories (tiny logic programs) best explaining the sequence.
         The search completes after a preset amount of time or as soon as a good enough theory is found.
         A causal theory can then be used to predict incoming observations.
   
-   The apperception engine searches by iterating through "regions"" of roughly increasing solution complexity,
-   each region specifying templates (vocabularies of identical complexity) with which to express causal theories.
+   The AE searches by iterating through "regions"" of roughly increasing solution complexity,
+   each region specifying templates with vocabularies of identical complexity) in which to express causal theories.
    The set of all templates defines the search space for causal theories.
 
-   For each template, the apperception engine constructs theories specified by the templates on offer and evaluates them for Kantian unity, for accuracy and complexity.
+   For each template, the AE constructs theories the template specifies and evaluates them for Kantian unity, for accuracy and complexity.
    It rejects those that are not unified and retains the highest rated ones found so far.
 
-   The search is restrained by a number of parameters:
+   The search is constrained by a number of parameters:
 
-      max_signature_extension: (max_extension{max_object_types:1, max_objects:1, max_predicate_types:1}) How many object types, objects  and predicate types can be abduced (imagined)
-      good_enough_coverage:(Percent, e.g. 87) When a theory with at least this trace coverage is found, the search is terminated with this theory as the sole answer.
-      keep_n_theories: (Number) How many theories a template can contribute as candidates for the best overall theories on each iteration
-      funnel: (FromNumber-ToNumber) How many (most promising) templates are retained to be searched again on each iteration. The FromNumber is reduced by one after each iteration and never goes under ToNumber.
+      max_signature_extension: (max_extension{max_object_types:1, max_objects:1, max_predicate_types:1}) How many object types, objects and predicate types can be abduced (imagined beyond those implicit in the observations)
+      good_enough_coverage:(percent, e.g. 87) When a theory with at least this trace coverage is found, the search is terminated with this theory as the sole answer.
+      keep_n_theories: (a positive intneger) How many theories a template can contribute as candidates for the best overall theories on each iteration
+      funnel: (FromInteger-ToInteger) How many (most promising) templates are retained to be searched again on each iteration. The FromInteger is reduced by one after each iteration and never goes under ToInteger.
 
     The Apperception Engine applies a variety of heuristics and induction biases to improve the odds of finding a good enough sollution in good time,
-    if not on the current attempt then perhaps on the next one.
+    if not on the first attempt then perhaps on one after.
 
-    See https://zenodo.org/records/10325868
+    See [Finding causal theories quickly enough - building a responsive Apperception Engine](https://zenodo.org/records/15512255)
 */
 
 /*
@@ -88,7 +88,7 @@ apperceive(Sequence, ApperceptionLimits, Theories).
 
 'new templates region' @ templates_region(Region1, _) \ templates_region(Region2, _)#passive <=> Region1 \== Region2 | region_templates_count(0).
 'same template region' @ templates_region(_, _) \ templates_region(_, _)#passive <=> true.
-'one templates count' @ region_templates_count(_) \ region_templates_count(_)#passive <=> true.
+'replace templates count' @ region_templates_count(_) \ region_templates_count(_)#passive <=> true.
 'increment region templates count' @ templates_region(_, Max)#passive \ region_templates_count(Count)#passive, inc_templates_count <=> 
                                         Count < Max | Count1 is Count + 1, region_templates_count(Count1).
 'max region template count reached' @ inc_templates_count <=> fail.
@@ -100,7 +100,7 @@ apperceive(Sequence, ApperceptionLimits, Theories).
 'accumulate and keep count of better theories' @ better_theory(_, _, _) \ theories_count(Count)#passive <=> Count1 is Count + 1 | theories_count(Count1).
 
 'no need to trim theories' @ theories_count(Count), max_theories_count(Max) \ trim_theory(_, _) <=> Count =< Max | true.
-'trim a template-redundant theory' @ better_theory(_, R1, Id) \ trim_theory(_, Id), better_theory(_, R2, Id), theories_count(Count) <=>
+'trim a template-redundant theory' @ better_theory(_, R1, TemplateId) \ trim_theory(_, TemplateId), better_theory(_, R2, TemplateId), theories_count(Count) <=>
                                        better_or_same_rating(R1, R2), Count1 is Count -1 | theories_count(Count1).
 'trim theory with worst rating' @ trim_theory(WorstRating, ''), better_theory(_, WorstRating, _), theories_count(Count) <=>  Count1 is Count - 1 | theories_count(Count1).
 % Should not be needed
@@ -126,9 +126,9 @@ apperceive(Sequence, ApperceptionLimits, Theories).
 'clear exhausted templates' @ clear_exhausted_templates \ template_exhausted(_) <=> true.
 'done clearing exhausted templates' @ clear_exhausted_templates <=> true.
 
-% Given a sequence of observations and some limits, find good causal theories.
+% Given a sequence of observations and some limits, find good-enough causal theories.
 apperceive(Sequence, ApperceptionLimits, Theories) :-
-    log(error, apperception_engine, "STARTING"),
+    log(note, apperception_engine, "STARTING"),
     get_time(Now),
     init(ApperceptionLimits, Now),
     min_type_signature(Sequence, MinTypeSignature),
@@ -138,7 +138,7 @@ apperceive(Sequence, ApperceptionLimits, Theories) :-
     create_theory_template_engine(MinTypeSignature, VaryingPredicateNames, ApperceptionLimits.max_signature_extension, TemplateEngine),
     !,
     best_theories(ApperceptionLimits, SequenceAsTrace, TemplateEngine, first_iteration, 0, Now, Theories),
-    log(error, apperception_engine, "THEORIES = ~p~n", [Theories]),
+    log(note, apperception_engine, "THEORIES = ~p~n", [Theories]),
     destroy_engine(TemplateEngine).
 
 % Initialize apperception
@@ -244,7 +244,7 @@ excluded(Element, List) :-
 % Grab N templates and concurrently find the best theories in each template.
 % Keep the best theories from the templates searched.
 % Repeat.
-% Terminates when an exception is thrown, either because a perfect solution was found in a template, or time's up,
+% Terminates when an exception is thrown, either because a solution was found in a template, or time's up,
 % or all templates have been searched.
 search_for_theories(ApperceptionLimits, SequenceAsTrace, TemplateEngine, first_iteration, StartTime, Iteration, Epoch) :-
     check_time_expired,
@@ -313,7 +313,7 @@ got_template_from(TemplateEngine) :-
         log(warn, apperception_engine, "Max templates reached for region"),
         safe_engine_post(TemplateEngine, max_region_templates_reached(true)).
 
-% Ignore permission errors if previous post has not yet been fetched in the engine
+% Ignore permission errors if previous post has not yet been fetched by the engine
 safe_engine_post(Engine, Term) :-
     catch(
     (
@@ -419,6 +419,7 @@ found_better_theory(RatedTheory) :-
     better_theory(RatedTheory, RatedTheory.rating, RatedTheory.template.id),
     trim_theories.
 
+% Trim theories by removing one with the worst rating while preserving template representation
 trim_theories :-
     worst_rating(Rating),
     (duplicate_template_id(Id) ->

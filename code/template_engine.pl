@@ -61,6 +61,7 @@ create_theory_template_engine(MinTypeSignature, VaryingPredicateNames, MaxSignat
 %             max_region_templates: Max}.
 
 
+% A generator of templates for theories
 theory_template(MinTypeSignature, VaryingPredicateNames, MaxSignatureExtension, Template) :-
     scramble_signature(MinTypeSignature, ScrambledMinTypeSignature),
     % generated
@@ -76,6 +77,7 @@ theory_template(MinTypeSignature, VaryingPredicateNames, MaxSignatureExtension, 
     Template = template{id:Id, type_signature:ExtendedTypeSignature, min_type_signature:MinTypeSignature, varying_predicate_names:VaryingPredicateNames,
                         limits:TheoryLimits, region:SignatureExtensionRegion, max_region_templates: Max}.
 
+% What's the maximum number of templates allowed in a given region taking into account the minimum type signature
 allow_max_templates(MinTypeSignature, Region, Max) :-
     region(NumObjectTypes, NumObjects, NumPredicateTypes) = Region,
     length(MinTypeSignature.object_types, MinObjectTypes),
@@ -87,6 +89,7 @@ allow_max_templates(MinTypeSignature, Region, Max) :-
     Max is ObjectTypesCount * ObjectsCount * PredicatesCount,
     log(warn, template_engine, "Max ~p templates allowed for region ~p", [Max, Region]).
 
+% Scramble the order of elements of the signature so that we get some unpredictability
 scramble_signature(TypeSignature, ScrambledTypeSignature) :-
     random_permutation(TypeSignature.object_types, ScrambledObjectTypes),
     random_permutation(TypeSignature.objects, ScrambledObjects),
@@ -94,6 +97,7 @@ scramble_signature(TypeSignature, ScrambledTypeSignature) :-
     !,
     ScrambledTypeSignature = type_signature{object_types:ScrambledObjectTypes, objects:ScrambledObjects, predicate_types:ScrambledPredicateTypes}.
 
+% Get a region from an ordered set of regions, given the maximum extension to a signature
 signature_extension_region(MaxSignatureExtension, Region) :-
     findall(RatedRegion, rated_region(MaxSignatureExtension, RatedRegion), RatedRegions),
     sort(1, @=<, RatedRegions, Regions),
@@ -102,6 +106,7 @@ signature_extension_region(MaxSignatureExtension, Region) :-
     Region = region(NumObjectTypes, NumObjects, NumPredicateTypes),
     log(info, template_engine, "****REGION ~p", [Region]).
 
+% Make a region with an index reprensenting its randomly fuzzied frugality
 rated_region(max_extension{max_object_types:MaxObjectTypes, max_objects:MaxObjects, max_predicate_types:MaxPredicateTypes}, IndexedRegion) :-
     between(0, MaxObjectTypes, NumObjectTypes),
     between(0, MaxObjects, NumObjects),
@@ -109,13 +114,12 @@ rated_region(max_extension{max_object_types:MaxObjectTypes, max_objects:MaxObjec
     random_order(NumObjectTypes, NumObjects, NumPredicateTypes, RandomOrder),
     IndexedRegion = indexed_region(RandomOrder, NumObjectTypes, NumObjects, NumPredicateTypes).
 
-% Some randomness in the oredring but keep a progression from simpler
+% Some randomness in the index ordering regions, but keep a progression from simpler
 random_order(NumObjectTypes, NumObjects, NumPredicateTypes, RandomOrder) :-
     random_between(1, 3, Random),
     !,
     Frugality is NumObjectTypes + NumObjects + NumPredicateTypes,
     RandomOrder is Random + Frugality.
-
 
 % Come up with reasonable limits on the size, complexity and search time for theories in this template
 theory_complexity_bounds(TypeSignature, Limits) :-

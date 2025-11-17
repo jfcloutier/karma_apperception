@@ -6,6 +6,8 @@ An Apperception Engine is a system that analyzes sequences of observations and i
 
 The aim is to generate "good enough" causal theories "quickly enough" to support cognitive processes.
 
+See [Finding causal theories quickly enough - building a responsive Apperception Engine](https://zenodo.org/records/15512255)
+
 ## Core Functionality
 
 The engine's primary predicate, `apperceive/3`, takes a sequence of observations, a set of constraints (`ApperceptionLimits`), and outputs the best causal theories (`Theories`).
